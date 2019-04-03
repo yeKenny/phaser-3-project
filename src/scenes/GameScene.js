@@ -5,6 +5,8 @@ import PowerUp from '../sprites/PowerUp';
 import SMBTileSprite from '../sprites/SMBTileSprite';
 import AnimatedTiles from 'phaser-animated-tiles/dist/AnimatedTiles.min.js';
 import Fire from '../sprites/Fire';
+import firebase from 'firebase';
+import { firebaseConfig } from '../config';
 
 class GameScene extends Phaser.Scene {
     constructor(test) {
@@ -15,6 +17,10 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         this.load.scenePlugin('animatedTiles', AnimatedTiles, 'animatedTiles', 'animatedTiles');
+        firebase.database().ref('highScore').on('value', (snapshot) => {
+            this.score.pts = Number(snapshot.val());
+            this.score.textObject.setText(('' + this.score.pts).padStart(6, '0'));
+        });
     }
 
     create() {
@@ -208,9 +214,29 @@ class GameScene extends Phaser.Scene {
 
         this.fireballs = this.add.group({
             classType: Fire,
-            maxSize: 10,
+            maxSize: 100,
             runChildUpdate: false // Due to https://github.com/photonstorm/phaser/issues/3724
         });
+
+        for (let i = 0; i < 1000; i++) {
+            this.enemyGroup.add(new Turtle({
+                scene: this,
+                key: 'mario-sprites',
+                x: 500 + i * 75,
+                y: 100
+            }));
+        }
+
+        for (let i = 0; i < 1000; i++) {
+            this.enemyGroup.add(new Goomba({
+                scene: this,
+                key: 'sprites16',
+                x: 200 + i * 25,
+                y: 100
+            }));
+        }
+
+
     }
 
     update(time, delta) {
@@ -424,6 +450,7 @@ class GameScene extends Phaser.Scene {
     updateScore(score) {
         this.score.pts += score;
         this.score.textObject.setText(('' + this.score.pts).padStart(6, '0'));
+        firebase.database().ref('highScore').set(this.score.pts);
     }
 
     removeFlag(step = 0) {

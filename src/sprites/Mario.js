@@ -10,16 +10,18 @@ export default class Mario extends Phaser.GameObjects.Sprite {
         this.small();
 
         // this.animSuffix = 'Super';
-        // this.large();
+        this.large();
 
         this.bending = false;
         this.wasHurt = -1;
         this.flashToggle = false;
         this.star = {
-            active: false,
+            active: true,
             timer: -1,
             step: 0
         };
+        this.star.step = (this.star.step === 5) ? 0 : this.star.step + 1;
+        this.tint = [0xFFFFFF, 0xFF0000, 0xFFFFFF, 0x00FF00, 0xFFFFFF, 0x0000FF][this.star.step];
         this.enteringPipe = false;
         this.anims.play('stand');
         this.alive = true;
@@ -27,6 +29,7 @@ export default class Mario extends Phaser.GameObjects.Sprite {
         this.jumpTimer = 0;
         this.jumping = false;
         this.fireCoolDown = 0;
+        this.animSuffix = 'Fire';
 
         this.on('animationcomplete', () => {
             if (this.anims.currentAnim.key === 'grow' || this.anims.currentAnim.key === 'shrink') {
@@ -41,13 +44,13 @@ export default class Mario extends Phaser.GameObjects.Sprite {
             this.scene.scene.start('TitleScene');
 
             // If Mario falls down a cliff or died, just let him drop from the sky and prentend like nothing happened
-            // this.y = -32;
-            // if(this.x<16){
-            //   this.x = 16;
-            // }
-            // this.alive = true;
-            // this.scene.music.seek = 0;
-            // this.scene.music.play();
+            this.y = -32;
+            if(this.x<16){
+              this.x = 16;
+            }
+            this.alive = true;
+            this.scene.music.seek = 0;``
+            this.scene.music.play();
         } else if (this.y > 240 && this.alive) {
             this.die();
         }
@@ -77,8 +80,8 @@ export default class Mario extends Phaser.GameObjects.Sprite {
 
         if (this.star.active) {
             if (this.star.timer < 0) {
-                this.star.active = false;
-                this.tint = 0xFFFFFF;
+                // this.star.active = false;
+                // this.tint = 0xFFFFFF;
             } else {
                 this.star.timer -= delta;
                 this.star.step = (this.star.step === 5) ? 0 : this.star.step + 1;
@@ -137,7 +140,7 @@ export default class Mario extends Phaser.GameObjects.Sprite {
             this.run(0);
         }
 
-        if (input.jump && (!this.jumping || this.jumpTimer > 0)) {
+        if (input.jump) {
             this.jump();
         } else if (!input.jump) {
             this.jumpTimer = -1; // Don't resume jump if button is released, prevents mini double-jumps
