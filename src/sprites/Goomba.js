@@ -6,10 +6,18 @@ export default class Goomba extends Enemy {
         this.body.setVelocity(0, 0).setBounce(0, 0).setCollideWorldBounds(false);
         this.anims.play('goomba');
         this.killAt = 0;
+        this.time = 0
+        this.acceleration = -1
     }
 
     update(time, delta) {
         // If it's not activated, then just skip the update method (see Enemy.js)
+        if (time - this.time > 1000) {
+            console.log('JUMP');
+            this.time = time
+            this.body.setAccelerationY(this.acceleration * 1000)
+            this.acceleration *= -1
+        }
         if (!this.activated()) {
             return;
         }
